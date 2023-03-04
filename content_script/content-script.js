@@ -112,6 +112,9 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse){
                 removeTag = true;
                 replaceContent({'contentMap':request.sortedMap});
                 break;
+            case 4:
+
+                break;
         }
 	}	
 });		
@@ -162,7 +165,6 @@ function analysisDomText(options,node){
    // console.log("currentOpt: ",currentOpt)
     if(currentOpt>0){
         // traverse all the node of DOM
-		
         getContentText(node);
         /*
             Put the text content of each node into a list and send it to background, when we got the
@@ -217,7 +219,6 @@ function removeReplaceContent(){
         let contentPart2 = contentOriginal.substring(pos + value.length,contentOriginal.length);
         let contentChanged = contentPart1 + key + contentPart2;
         nodeChangedArray[i].node.textContent = contentChanged;  
-        //console.log("content changed: ",contentChanged)
     }
     nodeChangedArray = [];
     console.log("nodeChangedArray: ",nodeChangedArray.length)
@@ -308,5 +309,8 @@ function replaceContent(options){
     }   
 }
 
+function hideContent(){
+    
+}
 
 

@@ -3,7 +3,16 @@ const arrayAnalyNode = [{
 			content: null,
 			nodes: null
         }]
-
+const nodeChangedArray = [{
+    node:null,
+    key: null,
+    value: null,
+    pos:-1
+}]
+let previousOptions = -1;
+let currentOptions = 0;
+let removeTag = true;
+let highlightTag = false;
 // capture the click actities
 // let activities = [];
 // document.addEventListener('click', function(event) {
@@ -76,8 +85,7 @@ const arrayAnalyNode = [{
 //   }
 // }, false);
 
-let previousOptions = -1;
-let currentOptions = 0;
+
 browser.runtime.onMessage.addListener(function(request, sender, sendResponse){
 	if ('backgroundReturnOptions' === request.message) {
 		sendResponse('send this：'+JSON.stringify(request));
@@ -94,9 +102,14 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse){
 		sendResponse('send this：'+JSON.stringify(request));
         switch(currentOptions){
             case 2:
-                updateHtmlPage({'keywords':request.keywords,'groupID':request.groupID}); 
+                if(!highlightTag){
+                    highlightTag = true;
+                    removeTag = true;
+                    updateHtmlPage({'keywords':request.keywords,'groupID':request.groupID}); 
+                }
                 break;
             case 3:
+                removeTag = true;
                 replaceContent({'contentMap':request.sortedMap});
                 break;
         }
@@ -105,7 +118,7 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse){
 function analysisDomText(options,node){
 	let index = 0 	
     let currentOpt = options
-   	console.log("analysisDomText options",currentOpt)
+   //	console.log("analysisDomText options",currentOpt)
     function getContentText(node){
         
         if (node.nodeType === Node.TEXT_NODE) {
@@ -163,7 +176,24 @@ function analysisDomText(options,node){
             console.log("response from arrayAnalyText background: ",response);
         });
     }else{
-		removeHighlights(document.body)
+        console.log("current options: ",currentOptions);
+        console.log("previousOptions: ",previousOptions)
+        console.log("removeTag:   ",removeTag)
+        if(removeTag){
+            switch(previousOptions){
+                case 2:  
+                    removeTag = false;
+                    removeHighlights(document.body);
+                    highlightTag = false;
+                    break;
+                case 3:
+                    removeTag = false;
+                    removeReplaceContent();
+                    break;
+            }  
+           // removeTag = false;  
+        }
+        
 	}		  
 }
 
@@ -174,7 +204,24 @@ function removeHighlights(node) {
 		}
 		occurrences = 0;
 }
-function removeReplaceContent(){}
+
+function removeReplaceContent(){
+    //console.log("nodeChangedArray length: ",nodeChangedArray.length)
+    for(let i = 0;i<nodeChangedArray.length;i++){
+        let contentOriginal = nodeChangedArray[i].node.textContent;
+        pos = nodeChangedArray[i].pos;
+        //console.log("content original: ",contentOriginal,"  emoji value",value.length)
+        let key = nodeChangedArray[i].key;
+        let value = nodeChangedArray[i].value;
+        let contentPart1 = contentOriginal.substring(0,pos);
+        let contentPart2 = contentOriginal.substring(pos + value.length,contentOriginal.length);
+        let contentChanged = contentPart1 + key + contentPart2;
+        nodeChangedArray[i].node.textContent = contentChanged;  
+        //console.log("content changed: ",contentChanged)
+    }
+    nodeChangedArray = [];
+    console.log("nodeChangedArray: ",nodeChangedArray.length)
+}
 let count = 0 ;
 const observer = new MutationObserver((mutations) => {
 	mutations.forEach((mutation) => {
@@ -227,31 +274,35 @@ function updateHtmlPage(options){
         }
     }   
 }
+
 // replace content
 function replaceContent(options){
-    let contentMap = options.contentMap;
     let index = 0;
-    function replace(node,pos,replaceText){
-        //console.log("highlight is called ---------------------------")
-        let span = document.createElement('span');
-        span.className = 'highlighted';
-        let highlighted = node.splitText(pos);
-        highlighted.splitText(replaceText.length);
-        let highlightedClone = highlighted.cloneNode(true);
-        highlightedClone.textContent = replaceText;
-        console.log("replace content: ",highlightedClone.textContent)
-        span.appendChild(highlightedClone);
-        highlighted.parentNode.replaceChild(span, highlighted);
-        index++
-    }
+    let contentMap = options.contentMap;
     for(var i = 0;i<arrayAnalyNode.length;i++){
-        let content = arrayAnalyNode[i].nodes.textContent.toLowerCase();
+       let content = arrayAnalyNode[i].nodes.textContent.toLowerCase();
         for (let [key, value] of contentMap) {
             let keyword = key.toLowerCase();
             let pos = content.indexOf(keyword);
             if(0 <= pos){
-                arrayAnalyNode[i].highlighted = true 
-                replace(arrayAnalyNode[i].nodes, pos, value);  
+                let contentOriginal = arrayAnalyNode[i].nodes.textContent;
+                let contentPart1 = contentOriginal.substring(0,pos);
+                let contentPart2 = contentOriginal.substring(pos + keyword.length,contentOriginal.length);
+                let contentChanged = contentPart1 + value + contentPart2;
+                arrayAnalyNode[i].nodes.textContent = contentChanged;
+                let nodeChanged = {
+                    node:null,
+                    key: null,
+                    value: null,
+                    pos:-1
+                }
+                nodeChangedArray.push(nodeChanged);
+                nodeChangedArray[index].node = arrayAnalyNode[i].nodes;
+                nodeChangedArray[index].key = key;
+                nodeChangedArray[index].value = value;
+                nodeChangedArray[index].pos = pos;
+                index++;
+                
             }
         }   
     }   

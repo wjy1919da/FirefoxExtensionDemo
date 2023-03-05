@@ -9,6 +9,11 @@ const nodeChangedArray = [{
     value: null,
     pos:-1
 }]
+const hideNodeArray = [{
+    content: null,
+	nodes: null,
+    backgroundColor:null
+}]
 let previousOptions = -1;
 let currentOptions = 0;
 let removeTag = true;
@@ -84,8 +89,6 @@ let highlightTag = false;
 //     //alert('Control key was released');
 //   }
 // }, false);
-
-
 browser.runtime.onMessage.addListener(function(request, sender, sendResponse){
 	if ('backgroundReturnOptions' === request.message) {
 		sendResponse('send this：'+JSON.stringify(request));
@@ -177,7 +180,7 @@ function analysisDomText(options,node){
         */
 		let arrayAnalyText = arrayAnalyNode.map(ptt => ptt.content)
 		browser.runtime.sendMessage({ type: 'arrayAnalyText', data: arrayAnalyText }).then(function (response) {
-            console.log("response from arrayAnalyText background: ",response);
+            //console.log("response from arrayAnalyText background: ",response);
         });
     }else{
         if(removeTag){
@@ -190,6 +193,9 @@ function analysisDomText(options,node){
                 case 3:
                     removeTag = false;
                     removeReplaceContent();
+                    break;
+                case 4:
+                    removeHideContent();
                     break;
                 case 5:
                     removeHideElement();
@@ -288,26 +294,21 @@ function hideContent(options){
             let key = keywords[j].toLowerCase();
             let pos = content.indexOf(key);
             if(0 <= pos){
-                let nodeChanged = {
-                    node:null,
-                    key: null,
-                    value: null,
-                    pos:-1
+                console.log("found pos: ",pos);
+                const hideNode = {
+                    nodes:null,
+                    content:null,
+                    backgroundColor: null
                 }
-                //console.log("parent node: ",node.parentNode)
-                let span = document.createElement('span');
-                span.className = 'highlighted';
-                span.style.backgroundColor = "red";
-                let hideNodeClone = node.cloneNode(true);
-                span.appendChild(hideNodeClone);
-                node.parentNode.replaceChild(span, node);
-
-                //hide(node,options,style)
-                nodeChangedArray.push(nodeChanged);
-                nodeChangedArray[index].node = arrayAnalyNode[i].nodes;
-                nodeChangedArray[index].key = key;
-                nodeChangedArray[index].pos = pos;
+                hideNodeArray.push(hideNode);
+                hideNodeArray[index].nodes = node.parentNode.parentNode;
+                hideNodeArray[index].content = node.parentNode.parentNode.textContent;
+                hideNodeArray[index].backgroundColor = node.parentNode.parentNode.innerHTML;
+                node.parentNode.parentNode.style.backgroundColor = "blue";
+                node.parentNode.parentNode.textContent = "bbbbbb";
+                console.log("iteration: ",index);
                 index++;
+                
             }
         }   
     }   
@@ -344,7 +345,15 @@ function replaceContent(options){
         }   
     }   
 }
-
+function removeHideContent(){
+    for(let i = 0;i<hideNodeArray.length;i++){
+        let contentOriginal = hideNodeArray[i].content;
+        let backgroundColorOriginal = hideNodeArray[i].backgroundColor;
+        hideNodeArray[i].nodes.textContent = contentOriginal;
+        hideNodeArray[i].nodes.backgroundColor = backgroundColorOriginal;
+    }
+    hideNodeArray = [];
+}
 function hideElement(){
     let elements = document.querySelectorAll('span.FHCV02u6Cp2zYL0fhQPsO, a._1UoeAeSRhOKSNdY_h3iS1O,span._vaFo96phV6L5Hltvwcox');
     for (let i = 0; i < elements.length; i++) {

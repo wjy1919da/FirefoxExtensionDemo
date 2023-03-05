@@ -113,7 +113,10 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse){
                 replaceContent({'contentMap':request.sortedMap});
                 break;
             case 4:
-
+                hideContent({'keywords':request.keywords});
+                break;
+            case 5:
+                hideElement();
                 break;
         }
 	}	
@@ -173,14 +176,10 @@ function analysisDomText(options,node){
 
         */
 		let arrayAnalyText = arrayAnalyNode.map(ptt => ptt.content)
-        console.log("content ask for data...")
 		browser.runtime.sendMessage({ type: 'arrayAnalyText', data: arrayAnalyText }).then(function (response) {
             console.log("response from arrayAnalyText background: ",response);
         });
     }else{
-        console.log("current options: ",currentOptions);
-        console.log("previousOptions: ",previousOptions)
-        console.log("removeTag:   ",removeTag)
         if(removeTag){
             switch(previousOptions){
                 case 2:  
@@ -191,6 +190,9 @@ function analysisDomText(options,node){
                 case 3:
                     removeTag = false;
                     removeReplaceContent();
+                    break;
+                case 5:
+                    removeHideElement();
                     break;
             }  
            // removeTag = false;  
@@ -221,7 +223,7 @@ function removeReplaceContent(){
         nodeChangedArray[i].node.textContent = contentChanged;  
     }
     nodeChangedArray = [];
-    console.log("nodeChangedArray: ",nodeChangedArray.length)
+    //console.log("nodeChangedArray: ",nodeChangedArray.length)
 }
 let count = 0 ;
 const observer = new MutationObserver((mutations) => {
@@ -269,14 +271,48 @@ function updateHtmlPage(options){
             let keyword = keywords[j].toLowerCase();
             let pos = content.indexOf(keyword);
             if(0 <= pos){
-				arrayAnalyNode[i].highlighted = true 
                 highlight(arrayAnalyNode[i].nodes, pos, keyword, options, String(i).slice(-1));  
             }
         }
     }   
 }
 
-// replace content
+//hide content
+function hideContent(options){
+    let index = 0;
+    let keywords = options.keywords;
+    for(var i = 0;i<arrayAnalyNode.length;i++){
+       let content = arrayAnalyNode[i].nodes.textContent.toLowerCase();
+       let node = arrayAnalyNode[i].nodes;
+        for (let j = 0;j< keywords.length;j++) {
+            let key = keywords[j].toLowerCase();
+            let pos = content.indexOf(key);
+            if(0 <= pos){
+                let nodeChanged = {
+                    node:null,
+                    key: null,
+                    value: null,
+                    pos:-1
+                }
+                //console.log("parent node: ",node.parentNode)
+                let span = document.createElement('span');
+                span.className = 'highlighted';
+                span.style.backgroundColor = "red";
+                let hideNodeClone = node.cloneNode(true);
+                span.appendChild(hideNodeClone);
+                node.parentNode.replaceChild(span, node);
+
+                //hide(node,options,style)
+                nodeChangedArray.push(nodeChanged);
+                nodeChangedArray[index].node = arrayAnalyNode[i].nodes;
+                nodeChangedArray[index].key = key;
+                nodeChangedArray[index].pos = pos;
+                index++;
+            }
+        }   
+    }   
+}
+
 function replaceContent(options){
     let index = 0;
     let contentMap = options.contentMap;
@@ -309,8 +345,24 @@ function replaceContent(options){
     }   
 }
 
-function hideContent(){
-    
+function hideElement(){
+    let elements = document.querySelectorAll('span.FHCV02u6Cp2zYL0fhQPsO, a._1UoeAeSRhOKSNdY_h3iS1O,span._vaFo96phV6L5Hltvwcox');
+    for (let i = 0; i < elements.length; i++) {
+        elements[i].style.display = 'none';
+    }
+    let element2 = document.querySelectorAll('a.M2Hk_S2yvXpsNPfZMBMur._1s79QnBguPbckxiiPvFXGP._2iuoyPiKHN3kfOoeIQalDT._3zbhtNO0bdck0oYbYRhjMC.HNozj_dKjQZ59ZsfEegz8')
+    for (let i = 0; i < elements.length; i++) {
+        element2[i].style.display = 'none';
+    }
 }
 
-
+function removeHideElement(){
+    let elements = document.querySelectorAll('span.FHCV02u6Cp2zYL0fhQPsO, a._1UoeAeSRhOKSNdY_h3iS1O,span._vaFo96phV6L5Hltvwcox');
+    for (let i = 0; i < elements.length; i++) {
+        elements[i].style.display = 'inline';
+    }
+    let element2 = document.querySelectorAll('a.M2Hk_S2yvXpsNPfZMBMur._1s79QnBguPbckxiiPvFXGP._2iuoyPiKHN3kfOoeIQalDT._3zbhtNO0bdck0oYbYRhjMC.HNozj_dKjQZ59ZsfEegz8')
+    for (let i = 0; i < elements.length; i++) {
+        element2[i].style.display = 'inline';
+    }
+}

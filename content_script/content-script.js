@@ -18,6 +18,7 @@ let previousOptions = -1;
 let currentOptions = 0;
 let removeTag = true;
 let highlightTag = false;
+let hideTag = false;
 // capture the click actities
 // let activities = [];
 // document.addEventListener('click', function(event) {
@@ -89,6 +90,7 @@ let highlightTag = false;
 //     //alert('Control key was released');
 //   }
 // }, false);
+
 browser.runtime.onMessage.addListener(function(request, sender, sendResponse){
 	if ('backgroundReturnOptions' === request.message) {
 		sendResponse('send this：'+JSON.stringify(request));
@@ -116,7 +118,11 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse){
                 replaceContent({'contentMap':request.sortedMap});
                 break;
             case 4:
-                hideContent({'keywords':request.keywords});
+                if(!hideTag){
+                    hideTag = true;
+                    removeTag = true;
+                    hideWords({'keywords':request.keywords});
+                }
                 break;
             case 5:
                 hideElement();
@@ -195,7 +201,10 @@ function analysisDomText(options,node){
                     removeReplaceContent();
                     break;
                 case 4:
-                    removeHideContent();
+                   // removeHideContent();
+                    removeTag = false;
+                    removeHideWords(document.body);
+                    hideTag = false;
                     break;
                 case 5:
                     removeHideElement();
@@ -214,7 +223,13 @@ function removeHighlights(node) {
 		}
 		occurrences = 0;
 }
-
+function removeHideWords(node) {
+    let span;
+    while ((span = node.querySelector('span.chromane-blur_text-blur'))) {
+      span.outerHTML = span.innerHTML;
+    }
+    occurrences = 0;
+}
 function removeReplaceContent(){
     //console.log("nodeChangedArray length: ",nodeChangedArray.length)
     for(let i = 0;i<nodeChangedArray.length;i++){
@@ -231,6 +246,7 @@ function removeReplaceContent(){
     nodeChangedArray = [];
     //console.log("nodeChangedArray: ",nodeChangedArray.length)
 }
+
 let count = 0 ;
 const observer = new MutationObserver((mutations) => {
 	mutations.forEach((mutation) => {
@@ -253,7 +269,7 @@ observer.observe(document.body, {
 function updateHtmlPage(options){
     let keywords = options.keywords;
 	//console.log('updateHtmlPage ',options.keywords)
-    let index = 0;
+   
     function highlight(node,pos,keyword,options,style){
         //console.log("highlight is called ---------------------------")
         let span = document.createElement('span');
@@ -266,13 +282,10 @@ function updateHtmlPage(options){
         let highlightedClone = highlighted.cloneNode(true);
         span.appendChild(highlightedClone);
         highlighted.parentNode.replaceChild(span, highlighted);
-		//node.parentElement.setAttribute('highlighted', true)
-        index++
+       
     }
     for(var i = 0;i<arrayAnalyNode.length;i++){
-        let content = arrayAnalyNode[i].nodes.textContent.toLowerCase() 
-		
-		//if (ppt)  continue ;
+        let content = arrayAnalyNode[i].nodes.textContent.toLowerCase()
         for(let j = 0; j < keywords.length; j++){
             let keyword = keywords[j].toLowerCase();
             let pos = content.indexOf(keyword);
@@ -285,8 +298,9 @@ function updateHtmlPage(options){
 
 //hide content
 function hideContent(options){
-    let index = 0;
+    //let index = 0;
     let keywords = options.keywords;
+   
     for(var i = 0;i<arrayAnalyNode.length;i++){
        let content = arrayAnalyNode[i].nodes.textContent.toLowerCase();
        let node = arrayAnalyNode[i].nodes;
@@ -294,25 +308,74 @@ function hideContent(options){
             let key = keywords[j].toLowerCase();
             let pos = content.indexOf(key);
             if(0 <= pos){
-                console.log("found pos: ",pos);
+                //console.log("found pos: ",pos);
                 const hideNode = {
                     nodes:null,
                     content:null,
                     backgroundColor: null
                 }
-                hideNodeArray.push(hideNode);
-                hideNodeArray[index].nodes = node.parentNode.parentNode;
-                hideNodeArray[index].content = node.parentNode.parentNode.textContent;
-                hideNodeArray[index].backgroundColor = node.parentNode.parentNode.innerHTML;
-                node.parentNode.parentNode.style.backgroundColor = "blue";
-                node.parentNode.parentNode.textContent = "bbbbbb";
-                console.log("iteration: ",index);
-                index++;
+                // hideNodeArray.push(hideNode);
+                // hideNodeArray[index].nodes = node.parentNode.parentNode;
+                // hideNodeArray[index].content = node.parentNode.parentNode.textContent;
+                // hideNodeArray[index].backgroundColor = node.parentNode.parentNode.innerHTML;
+                let flag = false;
+                console.log("---------------------------------");
+                while(node.parentElement!==null){
+                   
+                    console.log("node processing: ",node.parentElement);
+
+                    console.log("node attribute: ",node.parentElement.getAttribute("role"))
+                    node = node.parentElement;
+                    // if(node.parentElement.role=="section"){
+                    //     flag = true;
+                    //     break;
+                    // }
+                }
+                if(flag==true){
+                    console.log("node: ",node);
+                }
+
+            //     node.parentNode.parentNode.style.backgroundColor = "blue";
+            //     let oriContent = node.parentNode.parentNode.textContent;
+            //    // console.log("oriContent: ",oriContent);
+            //     node.parentNode.parentNode.textContent = "bbbbbb";
+                //console.log("hide changed: ",node.parentNode.parentNode.textContent)
+                //console.log("iteration: ",index);
+                //index++;
                 
             }
         }   
     }   
 }
+
+function hideWords(options){
+    let keywords = options.keywords;
+	console.log("hideWords is called....")
+    let index = 0;
+    function hide(node,pos,keyword){
+       
+        let span = document.createElement("span");
+        span.innerText = node.textContent;
+        span.classList.add("chromane-blur_text-blur");
+        let hided = node.splitText(pos);
+        hided.splitText(keyword.length);
+        let hidedClone = hided.cloneNode(true);
+        span.appendChild(hidedClone);
+        hided.parentNode.replaceChild(span, hided);
+    }
+    for(var i = 0;i<arrayAnalyNode.length;i++){
+        let content = arrayAnalyNode[i].nodes.textContent.toLowerCase()
+        for(let j = 0; j < keywords.length; j++){
+            let keyword = keywords[j].toLowerCase();
+            let pos = content.indexOf(keyword);
+            if(0 <= pos){
+                hide(arrayAnalyNode[i].nodes, pos, keyword);  
+            }
+        }
+    }   
+}
+
+
 
 function replaceContent(options){
     let index = 0;
@@ -340,16 +403,23 @@ function replaceContent(options){
                 nodeChangedArray[index].value = value;
                 nodeChangedArray[index].pos = pos;
                 index++;
-                
+                 
             }
         }   
     }   
 }
 function removeHideContent(){
+    console.log("removeHide is called....");
+    console.log("length of hideNodeArray length: ",hideNodeArray.length)
     for(let i = 0;i<hideNodeArray.length;i++){
+        console.log("remove iteration: ",i);
         let contentOriginal = hideNodeArray[i].content;
+        
         let backgroundColorOriginal = hideNodeArray[i].backgroundColor;
+        //console.log("contentOriginal: ", contentOriginal);
+        console.log("changed textContent: ")
         hideNodeArray[i].nodes.textContent = contentOriginal;
+        console.log("after ori textContent: ",hideNodeArray[i].nodes.textContent)
         hideNodeArray[i].nodes.backgroundColor = backgroundColorOriginal;
     }
     hideNodeArray = [];

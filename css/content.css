@@ -53,3 +53,7 @@
 .highlighted.style-9 {
   background: #8bd23e;
 }
+
+.chromane-blur_text-blur {
+  filter: blur(10px);
+}

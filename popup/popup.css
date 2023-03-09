@@ -7,6 +7,9 @@ body {
 main {
     margin: 10px;
 }
+option {
+    color: black;
+}
 
 .containerRight {
     display: flex;

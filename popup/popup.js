@@ -48,7 +48,7 @@ btnOptions.addEventListener("change", function() {
 });
 
 function updatePopup(authString) {
-  console.log("auth return from background: ", auth);
+ // console.log("auth return from background: ", auth);
   const emailDisplay = document.getElementById("email")
   const passwordDisplay = document.getElementById("password")
   const loginDisplay = document.getElementById("login")
@@ -58,7 +58,7 @@ function updatePopup(authString) {
   const optionsDiv = document.getElementById("btnOptionsDiv");
   
   if (auth === true) {
-    console.log("change popup UI auth is!!!!!!!!", auth)
+    //console.log("change popup UI auth is!!!!!!!!", auth)
     highlightDisplay.style.display = 'inline'
     resetDisplay.style.display  = 'inline'
     labelDisplay.style.display = 'inline'
@@ -69,7 +69,7 @@ function updatePopup(authString) {
     
    
   }else if(auth === false){
-    console.log("change popup UI auth is!!!!!!!!", auth)
+    //console.log("change popup UI auth is!!!!!!!!", auth)
     highlightDisplay.style.display = 'none'
     resetDisplay.style.display  = 'none'
     labelDisplay.style.display = 'none'

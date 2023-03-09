@@ -201,9 +201,8 @@ function analysisDomText(options,node){
                     removeReplaceContent();
                     break;
                 case 4:
-                   // removeHideContent();
                     removeTag = false;
-                    removeHideWords(document.body);
+                    removeHideContent()
                     hideTag = false;
                     break;
                 case 5:
@@ -296,72 +295,18 @@ function updateHtmlPage(options){
     }   
 }
 
-//hide content
-function hideContent(options){
-    //let index = 0;
-    let keywords = options.keywords;
-   
-    for(var i = 0;i<arrayAnalyNode.length;i++){
-       let content = arrayAnalyNode[i].nodes.textContent.toLowerCase();
-       let node = arrayAnalyNode[i].nodes;
-        for (let j = 0;j< keywords.length;j++) {
-            let key = keywords[j].toLowerCase();
-            let pos = content.indexOf(key);
-            if(0 <= pos){
-                //console.log("found pos: ",pos);
-                const hideNode = {
-                    nodes:null,
-                    content:null,
-                    backgroundColor: null
-                }
-                // hideNodeArray.push(hideNode);
-                // hideNodeArray[index].nodes = node.parentNode.parentNode;
-                // hideNodeArray[index].content = node.parentNode.parentNode.textContent;
-                // hideNodeArray[index].backgroundColor = node.parentNode.parentNode.innerHTML;
-                let flag = false;
-                console.log("---------------------------------");
-                while(node.parentElement!==null){
-                   
-                    console.log("node processing: ",node.parentElement);
-
-                    console.log("node attribute: ",node.parentElement.getAttribute("role"))
-                    node = node.parentElement;
-                    // if(node.parentElement.role=="section"){
-                    //     flag = true;
-                    //     break;
-                    // }
-                }
-                if(flag==true){
-                    console.log("node: ",node);
-                }
-
-            //     node.parentNode.parentNode.style.backgroundColor = "blue";
-            //     let oriContent = node.parentNode.parentNode.textContent;
-            //    // console.log("oriContent: ",oriContent);
-            //     node.parentNode.parentNode.textContent = "bbbbbb";
-                //console.log("hide changed: ",node.parentNode.parentNode.textContent)
-                //console.log("iteration: ",index);
-                //index++;
-                
-            }
-        }   
-    }   
-}
-
 function hideWords(options){
     let keywords = options.keywords;
-	console.log("hideWords is called....")
-    let index = 0;
-    function hide(node,pos,keyword){
-       
-        let span = document.createElement("span");
-        span.innerText = node.textContent;
-        span.classList.add("chromane-blur_text-blur");
-        let hided = node.splitText(pos);
-        hided.splitText(keyword.length);
-        let hidedClone = hided.cloneNode(true);
-        span.appendChild(hidedClone);
-        hided.parentNode.replaceChild(span, hided);
+    function hide(node){
+        if (node.parentNode.childNodes.length === 1) {
+            node.parentNode.classList.add("chromane-blur_text-blur");
+        } else {
+            let span = document.createElement("span");
+            span.innerText = node.textContent;
+            node.parentNode.insertBefore(span, node);
+            node.parentNode.removeChild(node);
+            span.classList.add("chromane-blur_text-blur");
+        }
     }
     for(var i = 0;i<arrayAnalyNode.length;i++){
         let content = arrayAnalyNode[i].nodes.textContent.toLowerCase()
@@ -369,7 +314,7 @@ function hideWords(options){
             let keyword = keywords[j].toLowerCase();
             let pos = content.indexOf(keyword);
             if(0 <= pos){
-                hide(arrayAnalyNode[i].nodes, pos, keyword);  
+                hide(arrayAnalyNode[i].nodes);  
             }
         }
     }   
@@ -409,20 +354,9 @@ function replaceContent(options){
     }   
 }
 function removeHideContent(){
-    console.log("removeHide is called....");
-    console.log("length of hideNodeArray length: ",hideNodeArray.length)
-    for(let i = 0;i<hideNodeArray.length;i++){
-        console.log("remove iteration: ",i);
-        let contentOriginal = hideNodeArray[i].content;
-        
-        let backgroundColorOriginal = hideNodeArray[i].backgroundColor;
-        //console.log("contentOriginal: ", contentOriginal);
-        console.log("changed textContent: ")
-        hideNodeArray[i].nodes.textContent = contentOriginal;
-        console.log("after ori textContent: ",hideNodeArray[i].nodes.textContent)
-        hideNodeArray[i].nodes.backgroundColor = backgroundColorOriginal;
-    }
-    hideNodeArray = [];
+    Array.from(document.querySelectorAll(".chromane-blur_text-blur")).forEach((element) => {
+        element.classList.remove("chromane-blur_text-blur");
+      });
 }
 function hideElement(){
     let elements = document.querySelectorAll('span.FHCV02u6Cp2zYL0fhQPsO, a._1UoeAeSRhOKSNdY_h3iS1O,span._vaFo96phV6L5Hltvwcox');
@@ -436,6 +370,7 @@ function hideElement(){
 }
 
 function removeHideElement(){
+
     let elements = document.querySelectorAll('span.FHCV02u6Cp2zYL0fhQPsO, a._1UoeAeSRhOKSNdY_h3iS1O,span._vaFo96phV6L5Hltvwcox');
     for (let i = 0; i < elements.length; i++) {
         elements[i].style.display = 'inline';

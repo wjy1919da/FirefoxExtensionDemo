@@ -128,7 +128,6 @@ browser.runtime.onMessage.addListener(function(request, sender) {
 			},
 			// send keyword and options to content
 			function(tabs) {
-				console.log("options from popup",options);
 				chrome.tabs.sendMessage(tabs[0].id, {
 					'message': 'backgroundReturnOptions',
 					'optionValue': options

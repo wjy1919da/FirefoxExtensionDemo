@@ -10,4 +10,4 @@
 
 - Store the user email and password into extension storage.
 
-- If users did not login in, they can not access to highlight function.
+- If users did not login in, they can not access to highlight function.# FirefoxExtensionDemo

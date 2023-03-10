@@ -355,7 +355,7 @@ function replaceContent(options){
     }   
 }
 function hideComment(){
-    console.log("hide comment is called..")
+ 
     let elementsToHide = "[data-testid='post-container']~div, .icon-comment, .icon-comment~span";
     let style = document.createElement('style');
     style.title = "hide_comments_everywhere";
@@ -370,7 +370,17 @@ function hideComment(){
     }
 }
 function showComment(){
-
+    console.log("show comment is called...length is: ",document.styleSheets.length)
+    for (let i = 0; i < document.styleSheets.length; i++) {
+        let stylesheet = document.styleSheets.item(i);
+        if (stylesheet.title === 'hide_comments_everywhere') {
+            let rules = stylesheet.cssRules || stylesheet.rules;
+            for (let j = 0; j < rules.length; j++) {
+                let rule = rules.item(j);
+                stylesheet.deleteRule(j);
+            }
+        }
+    }
 }
 function removeHideContent(){
     Array.from(document.querySelectorAll(".chromane-blur_text-blur")).forEach((element) => {

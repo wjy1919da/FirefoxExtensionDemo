@@ -125,7 +125,8 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse){
                 }
                 break;
             case 5:
-                hideElement();
+                //hideElement();
+                hideComment();
                 break;
         }
 	}	
@@ -206,7 +207,7 @@ function analysisDomText(options,node){
                     hideTag = false;
                     break;
                 case 5:
-                    removeHideElement();
+                    showComment();
                     break;
             }  
            // removeTag = false;  
@@ -353,30 +354,26 @@ function replaceContent(options){
         }   
     }   
 }
+function hideComment(){
+    console.log("hide comment is called..")
+    let elementsToHide = "[data-testid='post-container']~div, .icon-comment, .icon-comment~span";
+    let style = document.createElement('style');
+    style.title = "hide_comments_everywhere";
+    // 把所有element 的 display 改为none
+    let excluded_selectors = "code .comment, pre .comment, textarea.comments";
+    style.textContent = elementsToHide ? `${elementsToHide} { display: none !important; visibility: hidden !important } ${excluded_selectors} { display: unset; visibility: unset }` : '';
+    var header = document.querySelector('head');
+    if (header) {
+        header.appendChild(style);
+    } else {
+        document.documentElement.prepend(style);
+    }
+}
+function showComment(){
+
+}
 function removeHideContent(){
     Array.from(document.querySelectorAll(".chromane-blur_text-blur")).forEach((element) => {
         element.classList.remove("chromane-blur_text-blur");
       });
-}
-function hideElement(){
-    let elements = document.querySelectorAll('span.FHCV02u6Cp2zYL0fhQPsO, a._1UoeAeSRhOKSNdY_h3iS1O,span._vaFo96phV6L5Hltvwcox');
-    for (let i = 0; i < elements.length; i++) {
-        elements[i].style.display = 'none';
-    }
-    let element2 = document.querySelectorAll('a.M2Hk_S2yvXpsNPfZMBMur._1s79QnBguPbckxiiPvFXGP._2iuoyPiKHN3kfOoeIQalDT._3zbhtNO0bdck0oYbYRhjMC.HNozj_dKjQZ59ZsfEegz8')
-    for (let i = 0; i < elements.length; i++) {
-        element2[i].style.display = 'none';
-    }
-}
-
-function removeHideElement(){
-
-    let elements = document.querySelectorAll('span.FHCV02u6Cp2zYL0fhQPsO, a._1UoeAeSRhOKSNdY_h3iS1O,span._vaFo96phV6L5Hltvwcox');
-    for (let i = 0; i < elements.length; i++) {
-        elements[i].style.display = 'inline';
-    }
-    let element2 = document.querySelectorAll('a.M2Hk_S2yvXpsNPfZMBMur._1s79QnBguPbckxiiPvFXGP._2iuoyPiKHN3kfOoeIQalDT._3zbhtNO0bdck0oYbYRhjMC.HNozj_dKjQZ59ZsfEegz8')
-    for (let i = 0; i < elements.length; i++) {
-        element2[i].style.display = 'inline';
-    }
 }

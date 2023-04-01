@@ -14,3 +14,6 @@
 - If users did not login in, they can not access to highlight function.
 
 - Hide comment element everywhere
+
+- Package the funtion of content_script into a lib so other extensions are able to call it.
+

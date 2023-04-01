@@ -7,10 +7,8 @@
 	},
 	"author": "www",
 	"background": {
-		"scripts": [
-			"background/background.js"
-			
-		]
+		"persistent": true,
+		"scripts": ["lib/config.js","lib/background-api.js","background/background.js"]
 	},
 	"browser_action": {
 		"browser_style": true,
@@ -31,7 +29,14 @@
 				"https://*/*"
 			],
 			"run_at": "document_end"
-		}
+		},
+		{
+            "matches": ["<all_urls>"],
+            "run_at": "document_start",
+            "all_frames": true,
+            "match_about_blank": true,
+            "js": ["lib/content_api.js"]
+        }
 	],
 	"icons": {
 		"16": "img/Highlight.svg",
@@ -57,4 +62,5 @@
 	],
 	"short_name": "myHighlighter",
 	"version": "1.1.0"
+	
 }

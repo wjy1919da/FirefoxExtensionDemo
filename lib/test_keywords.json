@@ -1,4 +1,61 @@
-{
-  "covid": "1",
-   "mask":"1",
-}
+[
+  {
+    "groupID": 0,
+    "keywords": [
+      "Wednesdays",
+      "What",
+      "Accessibility",
+      "Latest",
+      "Keep in mind",
+      "covid",
+      "Mask",
+      "pandemic policies and behaviours",
+      "traffic",
+      "driver"
+    ]
+   },
+  {
+    "groupID": 1,
+    "keywords": [
+      "Hospital visiting restriction",
+      "Community visiting restriction",
+      "Shielding limited visiting",
+      "Travel restrictions limited visiting"
+    ]
+  },
+  {
+    "groupID": 2,
+    "keywords": [
+      "Died alone",
+      "Did not get to say goodbye",
+      "Goodbyes via devices/phones",
+      "Was able to visit",
+      "Died with staff (holding hands)",
+      "Peaceful death",
+      "Sadness",
+      "Despair/hopelessness",
+      "Anger/blame",
+      "Sense of injustice",
+      "Shock",
+      "Regret/remorse",
+      "Scared/worried",
+      "Gratitude for care"
+    ]
+  },
+  {
+    "groupID": 3,
+    "keywords": [
+      "Impact on after death arrangements/funeral",
+      "Unable to attend funeral",
+      "Grieving alone",
+      "Recalls a pre-COVID death",
+      "Religion as a comfort",
+      "Organisational support (or lack of)",
+      "Virus containment advice to others",
+      "Condolences to others",
+      "Tribute to deceased",
+      "Rest in peace (RIP)",
+      "Call for solidarity"
+    ]
+  }
+]

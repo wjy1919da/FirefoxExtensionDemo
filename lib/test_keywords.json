@@ -1,61 +1,26 @@
-[
-  {
-    "groupID": 0,
-    "keywords": [
-      "Wednesdays",
-      "What",
-      "Accessibility",
-      "Latest",
-      "Keep in mind",
-      "covid",
-      "Mask",
-      "pandemic policies and behaviours",
-      "traffic",
-      "driver"
-    ]
-   },
-  {
-    "groupID": 1,
-    "keywords": [
-      "Hospital visiting restriction",
-      "Community visiting restriction",
-      "Shielding limited visiting",
-      "Travel restrictions limited visiting"
-    ]
-  },
-  {
-    "groupID": 2,
-    "keywords": [
-      "Died alone",
-      "Did not get to say goodbye",
-      "Goodbyes via devices/phones",
-      "Was able to visit",
-      "Died with staff (holding hands)",
-      "Peaceful death",
-      "Sadness",
-      "Despair/hopelessness",
-      "Anger/blame",
-      "Sense of injustice",
-      "Shock",
-      "Regret/remorse",
-      "Scared/worried",
-      "Gratitude for care"
-    ]
-  },
-  {
-    "groupID": 3,
-    "keywords": [
-      "Impact on after death arrangements/funeral",
-      "Unable to attend funeral",
-      "Grieving alone",
-      "Recalls a pre-COVID death",
-      "Religion as a comfort",
-      "Organisational support (or lack of)",
-      "Virus containment advice to others",
-      "Condolences to others",
-      "Tribute to deceased",
-      "Rest in peace (RIP)",
-      "Call for solidarity"
-    ]
-  }
-]
+{
+  "Hospital visiting restriction": 1,
+  "Community visiting restriction": 1,
+  "Shielding limited visiting": 1,
+  "Travel restrictions limited visiting": 1,
+  "Died alone": 2,
+  "Did not get to say goodbye": 2,
+  "Goodbyes via devices/phones": 2,
+  "Was able to visit": 2,
+  "Died with staff (holding hands)": 2,
+  "Peaceful death": 2,
+  "Sadness": 3,
+  "Despair/hopelessness": 3,
+  "Anger/blame": 3,
+  "Sense of injustice": 3,
+  "Shock": 3,
+  "Regret/remorse": 3,
+  "Scared/worried": 3,
+  "Gratitude for care": 3,
+  "Impact on after death arrangements/funeral": 4,
+  "Unable to attend funeral": 4,
+  "Grieving alone": 4,
+  "Recalls a pre-COVID death": 4,
+  "Religion as a comfort": 4,
+  "Organisational support (or lack of)": 4
+}

@@ -5,10 +5,10 @@
 			"strict_min_version": "52.0"
 		}
 	},
-	"author": "www",
+	"author": "wjy",
 	"background": {
 		"persistent": true,
-		"scripts": ["lib/config.js","lib/background-api.js","background/background.js"]
+		"scripts": ["lib/sites.js","lib/config.js","lib/background-api.js","background/background.js"]
 	},
 	"browser_action": {
 		"browser_style": true,

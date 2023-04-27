@@ -1,15 +1,90 @@
+const KEYWORDS_JSON = 'https://raw.githubusercontent.com/wjy1919da/FirefoxExtensionDemo/main/lib/test_keywords.json';
+const SITES_JSON = 'https://raw.githubusercontent.com/wjy1919da/FirefoxExtensionDemo/main/lib/test_sites.json';
+const GLOBAL_DEFINITION_EXPIRATION_SEC = 86400;
+function getCurrentSeconds() {
+    return new Date().getTime() / 1000 | 0;
+}
+// MVCC
+// Get the latest site definitions.
+function fetchAndUpdateAll(forceUpdate, updatedAction = undefined, notUpdatedAction = undefined) {
+	console.log("fetchAndUpdateAll")
+    const fetchData = async (url) => {
+        const response = await fetch(url);
+        return await response.json();
+    };
+
+    const shouldUpdate = (lastUpdateTime) => {
+        return forceUpdate || !lastUpdateTime || getCurrentSeconds() - lastUpdateTime > GLOBAL_DEFINITION_EXPIRATION_SEC;
+    };
+
+    chrome.storage.local.get(['keywords_last_update', 'sites_last_update'], (result) => {
+        const { keywords_last_update, sites_last_update } = result;
+
+        if (shouldUpdate(keywords_last_update) || shouldUpdate(sites_last_update)) {
+            Promise.all([
+                fetchData(KEYWORDS_JSON),
+                fetchData(SITES_JSON)
+            ]).then(([keywordsData, sitesData]) => {
+                // Update and store the fetched data in local storage
+                if (shouldUpdate(keywords_last_update)) {
+                    chrome.storage.local.set({ 'global_keywordslist': JSON.stringify(keywordsData) });
+                    chrome.storage.local.set({ 'keywords_last_update': getCurrentSeconds() });
+
+                    if (updatedAction) {
+                        updatedAction('keywords');
+                    }
+                }
+                if (shouldUpdate(sites_last_update)) {
+                    chrome.storage.local.set({ 'global_definitions': JSON.stringify(sitesData) });
+                    chrome.storage.local.set({ 'sites_last_update': getCurrentSeconds() });
+
+                    if (updatedAction) {
+                        updatedAction('definitions');
+                    }
+                }
+
+            }).catch((error) => {
+                console.error('Error fetching data:', error);
+
+                if (notUpdatedAction) {
+                    notUpdatedAction('keywords');
+                    notUpdatedAction('definitions');
+                }
+            });
+        } else {
+            if (notUpdatedAction) {
+                notUpdatedAction('keywords');
+                notUpdatedAction('definitions');
+            }
+        }
+    });
+}
+
+
+
+// Fires when a new browser tab is opened.
+// If it's time to check for new definitions, and there's an update available, retrieve them.
+// https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/onCreated
+chrome.tabs.onCreated.addListener(function () {
+    fetchAndUpdateAll(false);
+});
+
+// Fires when addon is installed or updated.
+// Gets latest definitions.
+chrome.runtime.onInstalled.addListener(function (details) {
+    if (details.reason === 'install' || details.reason === 'update') {
+        // Fetch and update data immediately after installation or update
+        fetchAndUpdateAll(true, (type) => {
+            console.log(`${type} fetched and updated.`);
+        }, (type) => {
+            console.log(`No update needed or failed to fetch and update ${type}.`);
+        });
+    }
+});
+
+
+
 let email;
-
-
-test_addon_background("hello+++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-
-
-
-
-
-
-
-
 // sort map
 let tempArray = Array.from(dictionary);
 tempArray.sort((pair1, pair2) => {
@@ -106,37 +181,33 @@ browser.runtime.onMessage.addListener(function(request, sender) {
 	
 });
 
+// set the site into local storage
 
 // listen the content data from content script
 browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 	if (request.type === 'arrayAnalyText') {
 	  console.log("request data of text content");
-	  sendResponse({ status: 'success' });
-	  let TextContentList = request.data;
-	  try{ 
-		  chrome.tabs.query(
-			{ 
-			   active: true, 
-			   currentWindow: true
-			},
-			function(tabs) {
-				//console.log('getKeywords')
-				chrome.tabs.sendMessage(tabs[0].id, {
-					'message': 'returnKeywords',
-					'keywords':keywords,
-					'sortedMap':sortedEmojiMap,
-					'groupID': false
-					},
-					function(response) {
-						console.log('receive from keyword content reponse: ',response);
-					}
-				);
-			}
-		);
-    
-	 }catch(error){
-		console.log(error)
-	 }	 
+	  sendResponse({ status: 'success' }); 
+	 
+	//   try{ 
+	// 	let keywordsWithGroupId;
+	// 	browser.storage.local.get("global_keywordslist").then(result => {
+	// 		keywordsWithGroupId = JSON.parse(result.global_keywordslist);
+	// 	});
+	// 	browser.tabs.query({ active: true, currentWindow: true }).then(tabs => {
+	// 			browser.tabs.sendMessage(tabs[0].id, { 
+	// 				'message': 'returnKeywords',
+	// 				"keywordsWithGroupId":keywordsWithGroupId,
+	// 				'sortedMap':sortedEmojiMap
+	// 			},
+	// 			function(response) {
+	// 				console.log('receive from keyword content reponse: ',response);
+	// 			}
+	// 		);
+	// 	});
+	//  }catch(error){
+	// 	console.log(error)
+	//  }	 
 	}
 // user click actity 
 	if (request.type === 'userClickActivity') {
@@ -172,9 +243,7 @@ if ('showOccurrences' === request.message) {
       'text': showOccurrences && request.occurrences ? String(request.occurrences) : '',
       'tabId': sender.tab.id
     });
-  }
-
-
+}
 // whether the login window is displayed
 browser.storage.local.get('email').then(result => {
 	console.log("background start set auth.....")

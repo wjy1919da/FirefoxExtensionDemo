@@ -1,11 +1,11 @@
+// test blacklist
+//insertStylesIntoPage()
 // define a maplist of {node,content}
-
 let previousOptions = -1;
 let currentOptions = 0;
 let removeTag = true;
 let highlightTag = false;
 let hideTag = false;
-
 
 browser.runtime.onMessage.addListener(function(request, sender, sendResponse){
 	if ('backgroundReturnOptions' === request.message) {
@@ -19,33 +19,41 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse){
 		}	
 	}
     // if "isHighlight button is on"
-	if ('returnKeywords' === request.message) {
-		sendResponse('send this：'+JSON.stringify(request));
+	// if ('returnKeywords' === request.message) {
+	// 	sendResponse('send this：'+JSON.stringify(request));
         switch(currentOptions){
             case 2:
                 if(!highlightTag){
                     highlightTag = true;
                     removeTag = true;
-                    updateHtmlPage({'keywords':request.keywords,'groupID':request.groupID}); 
+                    //updateHtmlPage({'keywords':request.keywordsWithGroupId}); 
+                    updateHtmlPage();
                 }
                 break;
             case 3:
                 removeTag = true;
                 replaceContent({'contentMap':request.sortedMap});
+               // replaceContent();
                 break;
             case 4:
                 if(!hideTag){
                     hideTag = true;
                     removeTag = true;
-                    hideWords({'keywords':request.keywords});
+                    //hideWords({'keywords':request.keywordsWithGroupId});
+                    hideWords();
                 }
                 break;
             case 5:
-                //hideElement();
-                hideComment();
+            // hide comments everywhere  
+                insertStylesIntoPage();
+                break;
+            case 6:
+                console.log("case 6")
+                //hideKeywordComments({'keywords':request.keywordsWithGroupId});
+                hideKeywordComments();
                 break;
         }
-	}	
+	// }	
 });		
 
 const observer = new MutationObserver((mutations) => {
@@ -63,7 +71,4 @@ observer.observe(document.body, {
 	subtree: true
 });
   
-// {keyword:groupID,
-//keyword:groupID}
-// update the UI of node here
 
